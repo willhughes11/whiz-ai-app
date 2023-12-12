@@ -1,0 +1,1 @@
+  # Whiz AI App
