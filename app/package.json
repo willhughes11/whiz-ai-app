@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@nozbe/watermelondb": "^0.27.1",
     "expo": "~49.0.15",
     "expo-status-bar": "~1.6.0",
     "react": "18.2.0",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@babel/plugin-proposal-decorators": "^7.23.6",
     "@types/react": "~18.2.14",
     "typescript": "^5.1.3"
   },
