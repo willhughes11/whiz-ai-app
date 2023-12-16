@@ -2,17 +2,17 @@ import json
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from litellm import completion
-from .models import Conversation
+from .models import ChatModel
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @router.post("", include_in_schema=False)
 @router.post("/")
-async def chat(conversation: Conversation):
+async def chat(chat: ChatModel):
     try:
-        model = conversation.model
-        history = conversation.history
+        model = chat.model
+        history = chat.history
         ollama_api_base = "http://localhost:11434"
         api_base = ollama_api_base if "ollama" in model else None
 
@@ -27,8 +27,7 @@ async def chat(conversation: Conversation):
             answer = ""
             for chunk in response:
                 answer += chunk.choices[0].delta.content
-                assistant = json.dumps({"role": "assistant", "content": answer})
-                yield assistant
+                yield json.dumps({"role": "assistant", "content": answer})
             else:
                 print(json.dumps({"role": "assistant", "content": answer}))
 
