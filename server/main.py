@@ -5,7 +5,18 @@ from api.chat import router as chat
 from api.chatpdf import router as chatpdf
 from api.chunk_and_embed import router as chunk_and_embed
 
+from models import pdf
+from db.database import SessionLocal, engine
+pdf.Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 origins = ["*"]
 app.add_middleware(

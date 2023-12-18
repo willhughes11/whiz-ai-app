@@ -1,15 +1,19 @@
-import requests
+import uuid
 import gzip
-from fastapi import APIRouter, HTTPException
+import requests
+from pympler.asizeof import asizeof
 from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException
+import weaviate
+from weaviate.embedded import EmbeddedOptions
 from .models import ChatPdfModel
 from utils import (
-    chunk_text,
-    embed_chunked_text,
     extract_text_from_pdf_content,
     parallel_compress,
+    extract_pdf_name,
+    process_pdf,
+    process_pdf_multithreaded,
 )
-from pympler.asizeof import asizeof
 
 router = APIRouter(prefix="/chatpdf", tags=["chatpdf"])
 
@@ -18,7 +22,9 @@ router = APIRouter(prefix="/chatpdf", tags=["chatpdf"])
 @router.post("/upload")
 async def upload(chatpdf_model: ChatPdfModel):
     try:
+        pdf_id = uuid.uuid4()
         url = chatpdf_model.url
+        pdf_file_name = extract_pdf_name(url)
         response = requests.get(url)
         pdf_content = response.content
         pdf_text_list = extract_text_from_pdf_content(response.content)
@@ -28,22 +34,22 @@ async def upload(chatpdf_model: ChatPdfModel):
         else:
             compressed_content = parallel_compress(pdf_content)
 
-        chunk_threshold = 10
-        chunked_pdf_data = []
-        for text in pdf_text_list:
-            chunked_text = chunk_text(text, chunk_threshold)
-            chunked_and_embedded_text = embed_chunked_text(chunked_text)
-            for chunk in chunked_and_embedded_text:
-                print(chunk)
-                break
-            break
+        chunk_threshold = 25
+        token_overlap = 5
+        result_data = []
+        if len(pdf_text_list) < 15:
+            result_data = process_pdf(
+                pdf_id, pdf_file_name, pdf_text_list, chunk_threshold, token_overlap
+            )
+        else:
+            result_data = process_pdf_multithreaded(
+                pdf_id, pdf_file_name, pdf_text_list, chunk_threshold, token_overlap
+            )
 
-        return JSONResponse(
-            {
-                "text": pdf_text_list,
-                # "bytes": f"{pdf_content}",
-                # "compressed": f"{compressed_content}",
-            }
-        )
+        client = weaviate.Client(embedded_options=EmbeddedOptions())
+        for data in result_data:
+            client.data_object.create(data, "chatpdf")
+
+        return JSONResponse(result_data)
     except Exception as exc:
         raise HTTPException(status=500, detail=exc) from exc

@@ -1,5 +1,5 @@
 import torch
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 from transformers import AutoTokenizer, AutoModel
 
 
@@ -11,23 +11,12 @@ def embed_chunk(chunk, tokenizer, model):
     return {"chunk": chunk, "embeddings": avg_pooled.tolist()[0]}
 
 
-def embed_chunked_text(chunked_text: list[str]):
+def embed_chunked_text(chunked_text):
     model_name = "bert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name)
 
-    chunk_and_embeddings = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_chunk = {
-            executor.submit(embed_chunk, chunk, tokenizer, model): chunk
-            for chunk in chunked_text
-        }
-        for future in concurrent.futures.as_completed(future_to_chunk):
-            chunk = future_to_chunk[future]
-            try:
-                result = future.result()
-                chunk_and_embeddings.append(result)
-            except Exception as e:
-                print(f"Error embedding chunk '{chunk}': {e}")
+    with ThreadPoolExecutor() as executor:
+        chunk_and_embeddings = list(executor.map(embed_chunk, chunked_text, [tokenizer]*len(chunked_text), [model]*len(chunked_text)))
 
     return chunk_and_embeddings

@@ -1,16 +1,17 @@
 import nltk
 
 
-def chunk_text(text: str, max_chunk_length: int):
+def chunk_text(text, max_chunk_length, overlap=0):
     # Tokenize the text
     tokens = nltk.word_tokenize(text)
 
-    # Calculate the number of chunks based on the specified length
-    num_chunks = len(tokens) // max_chunk_length + (len(tokens) % max_chunk_length > 0)
+    # Calculate the number of chunks based on the specified length and overlap
+    step_size = max_chunk_length - overlap
+    num_chunks = (len(tokens) - overlap) // step_size + 1
 
-    # Create chunks
+    # Create chunks with overlap
     chunks = [
-        tokens[i * max_chunk_length : (i + 1) * max_chunk_length]
+        tokens[i * step_size : i * step_size + max_chunk_length]
         for i in range(num_chunks)
     ]
 
