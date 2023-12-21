@@ -9,6 +9,7 @@ load_dotenv()
 from api.chat import router as chat
 from api.chatpdf import router as chatpdf
 from api.chunk_and_embed import router as chunk_and_embed
+from config import VECTOR_DB_CLASS_NAME
 
 from models import pdf
 from db.database import SessionLocal, engine
@@ -37,7 +38,7 @@ client = weaviate.Client(
     embedded_options=EmbeddedOptions(),
     additional_headers={"X-OpenAI-Api-Key": openai_api_key},
 )
-class_name = "Chatpdf"
+class_name = VECTOR_DB_CLASS_NAME
 class_definition = {
     "class": class_name,
     "vectorizer": "text2vec-openai",

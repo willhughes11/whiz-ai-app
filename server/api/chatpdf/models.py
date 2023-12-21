@@ -2,6 +2,10 @@ from pydantic import BaseModel
 
 
 class ChatPdfModel(BaseModel):
-    history: list[dict] | None = []
-    model: str | None = ""
+    id: str | None
+    history: list[dict] | None
+    model: str | None
+
+
+class ChatPdfUploadModel(BaseModel):
     url: str | None

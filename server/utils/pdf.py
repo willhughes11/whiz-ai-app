@@ -53,9 +53,10 @@ def process_pdf_multithreaded(pdf_id: str, pdf_file_name: str, pdf_text_list: li
         chunked_and_embedded_text = embed_chunked_text(chunked_text)
         return [
             {
-                "source": f"{pdf_id}",
+                "source": pdf_id,
                 "source_page": f"{pdf_id}-{index}",
-                "file_name": pdf_file_name,
+                "file": pdf_file_name,
+                "file_page": f"{pdf_file_name}-{index}",
                 "chunk": chunk["chunk"],
                 "embeddings": chunk["embeddings"],
             }

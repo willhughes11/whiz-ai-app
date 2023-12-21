@@ -1,7 +1,7 @@
 import nltk
 
 
-def chunk_text(text, max_chunk_length, overlap=0):
+def chunk_text(text: str, max_chunk_length: int, overlap: int = 0):
     tokens = nltk.word_tokenize(text)
     step_size = max_chunk_length - overlap
     num_chunks = (len(tokens) - overlap) // step_size + 1
