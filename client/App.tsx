@@ -1,33 +1,33 @@
 import { StyleSheet, Text, View, Dimensions } from "react-native";
-import NavigationBar from "./src/components/NavigationBar";
+import { NavigationContainer } from "@react-navigation/native";
 import Chat from "./src/components/Chat";
+import { createDrawerNavigator, DrawerNavigationOptions } from "@react-navigation/drawer";
+import ChatPdf from "./src/components/ChatPdf";
+import BibleGpt from "./src/components/BibleGpt";
+import { BottomNavigation } from "./src/components/BottomNavigation";
 
-const { width, height } = Dimensions.get('window');
+const Drawer = createDrawerNavigator();
+const screenOptions: DrawerNavigationOptions = {
+};
+
+const { width, height } = Dimensions.get("window");
 
 export default function App() {
+  const thresholdWidth = 500;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.chatContainer}>
-        <Chat />
-      </View>
-      <View style={styles.navigationBar} className="w-full">
-        <NavigationBar />
-      </View>
-    </View>
+    <NavigationContainer>
+      {width > thresholdWidth ? <DrawerNavigation /> : <BottomNavigation />}
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    display: "flex",
-    backgroundColor: "#fff",
-    minHeight: "auto"
-  },
-  chatContainer: {
-    flex: 1
-  },
-  navigationBar: {
-    display: "flex"
-  }
-});
+const DrawerNavigation = () => {
+  return (
+    <Drawer.Navigator>
+      <Drawer.Screen name="Chat" component={Chat} />
+      <Drawer.Screen name="ChatPDF" component={ChatPdf} />
+      <Drawer.Screen name="BibleGPT" component={BibleGpt} />
+    </Drawer.Navigator>
+  );
+};
